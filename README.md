@@ -1,8 +1,5 @@
-# Apache Spark Standalone Cluster on Docker
-
-> The project was featured on an **[article](https://www.mongodb.com/blog/post/getting-started-with-mongodb-pyspark-and-jupyter-notebook)** at **MongoDB** official tech blog! :scream:
-
-> The project just got its own **[article](https://towardsdatascience.com/apache-spark-cluster-on-docker-ft-a-juyterlab-interface-418383c95445)** at **Towards Data Science** Medium blog! :sparkles:
+# Jupyter Apache Spark Standalone Cluster avec Docker
+ L'objectif de ce projet est de mettre en place un Cluster Spark avec une instance Jupyter sur Docker
 
 ## Introduction
 
