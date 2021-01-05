@@ -11,6 +11,8 @@ services:
   jupyterlab:
     image: andreper/jupyterlab:3.0.0-spark-3.0.0
     container_name: jupyterlab
+    extra_hosts: 
+      - jupyterlab_host:192.168.1.62
     ports:
       - 8888:8888
       - 4040:4040
@@ -43,7 +45,7 @@ services:
       - SPARK_WORKER_CORES=1
       - SPARK_WORKER_MEMORY=512m
     ports:
-      - 8082:8081
+      - 8082:8082
     volumes:
       - shared-workspace:/opt/workspace
     depends_on:
