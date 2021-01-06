@@ -44,7 +44,7 @@ services:
       - SPARK_WORKER_CORES=1
       - SPARK_WORKER_MEMORY=512m
     ports:
-      - 8082:8081
+      - 8082:8082
     volumes:
       - shared-workspace:/opt/workspace
     depends_on:
