@@ -8,11 +8,44 @@ volumes:
     name: "hadoop-distributed-file-system"
     driver: local
 services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
+    container_name: namenode
+    volumes:
+      - /tmp/hdfs/namenode:/hadoop/dfs/name
+      - shared-workspace:/opt/workspace
+    environment:
+      - CLUSTER_NAME=bigdata-tp
+    env_file:
+      - ./hadoop-hive.env
+    ports:
+      - "50070:50070"
+    # networks:
+    #   net_pet:
+    #     ipv4_address: 172.27.1.5
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
+    container_name: datanode
+    volumes:
+      - /tmp/hdfs/datanode:/hadoop/dfs/data
+      - ./bank:/bank
+      - shared-workspace:/opt/workspace
+    env_file:
+      - ./hadoop-hive.env
+    environment:
+      SERVICE_PRECONDITION: "namenode:50070"
+    depends_on:
+      - namenode
+    ports:
+      - "50075:50075"
+    depends_on:
+      - namenode
+    # networks:
+    #   net_pet:
+    #     ipv4_address: 172.27.1.6
   jupyterlab:
     image: andreper/jupyterlab:3.0.0-spark-3.0.0
     container_name: jupyterlab
-    extra_hosts: 
-      - jupyterlab_host:192.168.1.62
     ports:
       - 8888:8888
       - 4040:4040

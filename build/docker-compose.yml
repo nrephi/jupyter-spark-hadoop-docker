@@ -8,6 +8,21 @@ volumes:
     name: "hadoop-distributed-file-system"
     driver: local
 services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
+    container_name: namenode
+    volumes:
+      - /tmp/hdfs/namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=bigdata-tp
+    env_file:
+      - ./hadoop-hive.env
+    ports:
+      - "50070:50070"
+    networks:
+      net_pet:
+        ipv4_address: 172.27.1.5
+
   jupyterlab:
     image: jupyterlab:3.0.0-spark-3.0.0
     container_name: jupyterlab
