@@ -20,9 +20,9 @@ services:
       - ./hadoop-hive.env
     ports:
       - "50070:50070"
-    # networks:
-    #   net_pet:
-    #     ipv4_address: 172.27.1.5
+    networks:
+      my_network:
+        ipv4_address: 172.27.1.5
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
     container_name: datanode
@@ -40,9 +40,84 @@ services:
       - "50075:50075"
     depends_on:
       - namenode
-    # networks:
-    #   net_pet:
-    #     ipv4_address: 172.27.1.6
+    networks:
+      my_network:
+        ipv4_address: 172.27.1.6
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-server
+    env_file:
+      - ./hadoop-hive.env
+    environment:
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
+      SERVICE_PRECONDITION: "hive-metastore:9083"
+    ports:
+      - "11000:11000"
+    depends_on:
+      - hive-metastore
+    networks:
+      my_network:
+        ipv4_address: 172.27.1.7
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore
+    env_file:
+      - ./hadoop-hive.env
+    command: /opt/hive/bin/hive --service metastore
+    environment:
+      SERVICE_PRECONDITION: "namenode:50070 datanode:50075 hive-metastore-postgresql:5432"
+    ports:
+      - "9083:9083"
+    depends_on:
+      - hive-metastore-postgresql
+    networks:
+      my_network:
+        ipv4_address: 172.27.1.8
+  
+  hive-metastore-postgresql:
+    image: bde2020/hive-metastore-postgresql:2.3.0
+    container_name: hive-metastore-postgresql
+    depends_on:
+      - datanode
+    networks:
+      my_network:
+        ipv4_address: 172.27.1.9
+
+  hue:
+    image: gethue/hue:20191107-135001
+    hostname: hue
+    container_name: hue
+    dns: 8.8.8.8
+    ports:
+    - "8989:8888"
+    volumes:
+      - ./hue-overrides.ini:/usr/share/hue/desktop/conf/z-hue.ini
+    depends_on:
+      - database
+    networks:
+      my_network:
+        ipv4_address: 172.27.1.10  
+
+  database:
+    image: mysql:5.7
+    container_name: database
+    ports:
+        - "33061:3306"
+    command: --init-file /data/application/init.sql
+    volumes:
+        - /tmp/mysql/data:/var/lib/mysql
+        - ./init.sql:/data/application/init.sql
+    environment:
+        MYSQL_ROOT_USER: root
+        MYSQL_ROOT_PASSWORD: secret
+        MYSQL_DATABASE: hue
+        MYSQL_USER: root
+        MYSQL_PASSWORD: secret
+    networks:
+      my_network:
+        ipv4_address: 172.27.1.11
+
   jupyterlab:
     image: andreper/jupyterlab:3.0.0-spark-3.0.0
     container_name: jupyterlab
@@ -51,6 +126,10 @@ services:
       - 4040:4040
     volumes:
       - shared-workspace:/opt/workspace
+    networks:
+      my_network:
+        ipv4_address: 172.27.1.12
+
   spark-master:
     image: andreper/spark-master:3.0.0
     container_name: spark-master
@@ -59,6 +138,10 @@ services:
       - 7077:7077
     volumes:
       - shared-workspace:/opt/workspace
+    networks:
+      my_network:
+        ipv4_address: 172.27.1.13
+
   spark-worker-1:
     image: andreper/spark-worker:3.0.0
     container_name: spark-worker-1
@@ -71,6 +154,10 @@ services:
       - shared-workspace:/opt/workspace
     depends_on:
       - spark-master
+    networks:
+      my_network:
+        ipv4_address: 172.27.1.14
+
   spark-worker-2:
     image: andreper/spark-worker:3.0.0
     container_name: spark-worker-2
@@ -83,4 +170,14 @@ services:
       - shared-workspace:/opt/workspace
     depends_on:
       - spark-master
+    networks:
+      my_network:
+        ipv4_address: 172.27.1.15
+      
+networks:
+  my_network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.27.0.0/16
 ...
