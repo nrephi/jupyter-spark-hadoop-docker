@@ -56,12 +56,12 @@ services:
       - shared-workspace:/opt/workspace
     depends_on:
       - spark-master
-  hdfs-namenode:
-    image: harisekhon/hadoop
-    ports:
-      - 8088:8088
-    volumes:
-      - shared-workspace:/opt/workspace
+  # hdfs-namenode:
+  #   image: harisekhon/hadoop
+  #   ports:
+  #     - 8088:8088
+  #   volumes:
+  #     - shared-workspace:/opt/workspace
 
 
       
